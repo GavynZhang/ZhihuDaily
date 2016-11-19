@@ -28,6 +28,7 @@
                 android:id="@+id/article_content_text"
                 android:paddingLeft="16dp"
                 android:paddingRight="16dp"
+                android:paddingTop="10dp"
                 android:textSize="17sp"
                 android:textColor="@color/md_grey_800"
                 android:layout_width="match_parent"
