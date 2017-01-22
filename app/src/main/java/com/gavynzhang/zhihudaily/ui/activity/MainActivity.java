@@ -22,6 +22,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -72,6 +73,8 @@ public class MainActivity extends AppCompatActivity
 
     private String dbLatestDate = null;
 
+    private RelativeLayout mRelativeLayout;
+
     ZhihuDailyDB zhihuDailyDB = ZhihuDailyDB.getInstance(MyApplication.getContext());
 
     @Override
@@ -81,6 +84,7 @@ public class MainActivity extends AppCompatActivity
 
         articleIndexListView = (RecyclerView)findViewById(R.id.article_index);
         mRollPagerView = (RollPagerView)findViewById(R.id.roll_page_view);
+        mRelativeLayout = (RelativeLayout)findViewById(R.id.content_main);
 
         mRollPagerView.setOnItemClickListener(new OnItemClickListener() {
             @Override
@@ -91,7 +95,7 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-        //sendHttpRequest(API.LATEST);
+
         loadArticleIndexList();
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -128,6 +132,7 @@ public class MainActivity extends AppCompatActivity
                     break;
                 case SHOW_ROLLPAGERVIEW:
                     LogUtils.w("MainActiity","设置RollPagerView的Adapter");
+
                     mRollPagerView.setAdapter(new rollViewPagerAdapter(mTopStoriesBigImage));
                     break;
                 default:
@@ -415,11 +420,27 @@ public class MainActivity extends AppCompatActivity
 
     class ArticleIndexAdapter extends RecyclerView.Adapter{
 
+        private static final int VIEW_HEADER = 0;
+        private static final int VIEW_ITEM = 1;
+
+
         List<ArticleIndex> mArticleIndices;
 
         ArticleIndexAdapter(List<ArticleIndex> articleIndices){
             this.mArticleIndices = articleIndices;
         }
+
+//        /**重写该方法用于区分不同的视图
+//         * @param position
+//         * @return
+//         */
+//        @Override
+//        public int getItemViewType(int position) {
+//            if (position == 0){
+//                return VIEW_HEADER;
+//            }
+//            return VIEW_ITEM;
+//        }
 
         @Override
         public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -432,18 +453,23 @@ public class MainActivity extends AppCompatActivity
         public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
             ArticleIndexAdapter.ArticleIndexViewHolder vh = (ArticleIndexAdapter.ArticleIndexViewHolder)holder;
 
-            final ArticleIndex articleIndexData = mArticleIndices.get(position);
 
-            Glide.with(MyApplication.getContext()).load(articleIndexData.getImage_url()).into(vh.getArticleIndexImage());
-            vh.getArticleIndexTitle().setText(articleIndexData.getTitle());
+//            if (getItemViewType(position) == VIEW_ITEM) {
+                final ArticleIndex articleIndexData = mArticleIndices.get(position);
 
-            vh.itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    ArticleContentActivity.actionStart(MainActivity.this,articleIndexData.getId());
-                    //Toast.makeText(MyApplication.getContext(), articleIndexData.getTitle(), Toast.LENGTH_SHORT).show();
-                }
-            });
+                Glide.with(MyApplication.getContext()).load(articleIndexData.getImage_url()).into(vh.getArticleIndexImage());
+                vh.getArticleIndexTitle().setText(articleIndexData.getTitle());
+
+                vh.itemView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        ArticleContentActivity.actionStart(MainActivity.this, articleIndexData.getId());
+                        //Toast.makeText(MyApplication.getContext(), articleIndexData.getTitle(), Toast.LENGTH_SHORT).show();
+                    }
+                });
+//            }else if (getItemViewType(position) == VIEW_HEADER){
+//                //vh.getRollPagerView().setAdapter(new rollViewPagerAdapter(mTopStoriesBigImage));
+//            }
         }
 
         @Override
@@ -455,12 +481,22 @@ public class MainActivity extends AppCompatActivity
 
             private TextView articleIndexTitle;
             private ImageView articleIndexImage;
+            private RollPagerView mRollPagerView;
+
+            public RollPagerView getRollPagerView() {
+                return mRollPagerView;
+            }
+
+            public void setRollPagerView(RollPagerView rollPagerView) {
+                mRollPagerView = rollPagerView;
+            }
 
             public ArticleIndexViewHolder(View itemView) {
                 super(itemView);
 
                 articleIndexTitle = (TextView)itemView.findViewById(R.id.article_index_title_text);
                 articleIndexImage = (ImageView)itemView.findViewById(R.id.article_index_image);
+                mRollPagerView = (RollPagerView)itemView.findViewById(R.id.roll_page_view);
             }
 
             public ImageView getArticleIndexImage() {
@@ -481,26 +517,7 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-//    class BitmapAndId{
-//        private Bitmap mBitmap;
-//        private String id;
-//
-//        public String getId() {
-//            return id;
-//        }
-//
-//        public void setId(String id) {
-//            this.id = id;
-//        }
-//
-//        public Bitmap getBitmap() {
-//            return mBitmap;
-//        }
-//
-//        public void setBitmap(Bitmap bitmap) {
-//            mBitmap = bitmap;
-//        }
-//    }
+
     private List<String> getBeforeDate(){
         List<String> beforeDate = new ArrayList<>();
 
